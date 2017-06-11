@@ -1,19 +1,18 @@
-######
-# See: https://hub.docker.com/_/php/
-######
+FROM php:7-fpm-alpine
 
-FROM php:7.0.5-fpm
-MAINTAINER micooz <micooz@hotmail.com>
+RUN apk add --no-cache freetype libpng libjpeg-turbo freetype-dev libpng-dev \
+  libcurl curl-dev icu-dev libmcrypt-dev libxml2-dev libjpeg-turbo-dev
 
-######
-# You can install php extensions using docker-php-ext-install
-######
+RUN docker-php-ext-install json mysqli pdo pdo_mysql curl mbstring \
+  intl mcrypt xml zip
 
-RUN apt-get update && apt-get install -y \
-        libfreetype6-dev \
-        libjpeg62-turbo-dev \
-        libmcrypt-dev \
-        libpng12-dev \
-    && docker-php-ext-install -j$(nproc) iconv mcrypt \
-    && docker-php-ext-configure gd --with-freetype-dir=/usr/include/ --with-jpeg-dir=/usr/include/ \
-    && docker-php-ext-install -j$(nproc) gd
+RUN docker-php-ext-configure gd \
+    --with-gd \
+    --with-freetype-dir=/usr/include/ \
+    --with-png-dir=/usr/include/ \
+    --with-jpeg-dir=/usr/include/
+
+RUN docker-php-ext-install gd
+
+RUN apk del --no-cache freetype-dev libpng-dev libjpeg-turbo-dev \
+  icu-dev libmcrypt-dev libxml2-dev
